@@ -1,0 +1,110 @@
+<%- include('components/header') -%>
+<style>
+    #api-response-data-container{
+        margin-top: 60px;
+    }
+    .img3{
+         width: 100%;
+        height: 250px;
+    }
+    .img12{
+        height: 250px;
+    }
+    .card-text{
+        cursor: pointer;
+    }
+</style>
+<div class="container" id="api-response-data-container">
+</div>
+<div class="container">
+    <div class="col col-md-12 col-lg-12 col-sm-12 text-center">
+        <button id="show-more" class="">Show More</button>
+    </div>
+</div>
+
+<%- include('components/footer') -%>
+
+<script src="../ajax/myApp.js"></script>
+<script>
+    $(document).ready(function(){
+        var task = {
+            paginationLimit:2,
+            getNewsWithLimit: function(data){
+                app.getPaginationData(data).done(function(response){
+                    if(response.status == true){
+                        if(response.paginationState == true){
+                            render.renderNews(response.data);
+                        }else{
+                            alert('No more items');
+                        }
+                        
+                    }
+                })
+            }
+        }
+
+        var render = {
+            renderNews: function(data){
+                var container = $('#api-response-data-container').html('');
+                var itemSkip = 2;
+                var skip = 2;
+                var limit = 0;
+                var j = i = 0;
+                var totalLoop = Math.floor(data.length/2);
+                
+                for(i=0;i<totalLoop;i++){
+                    var $row = $("<div>", { "class": "row"});
+                    for(j=limit; j<skip; j++){
+                        var rowData = data[j];
+                        var title = rowData.title
+                        if(title.length > 15){
+                            title = title.substring(0,15)+'...';
+                        }
+                        var col = `<div class="col col-lg-6 col-md-6 col-sm-12">
+                                        <div class="card" style="width: 35.3rem;">
+                                            <img class="card-img-top img3" src="`+rowData.coverPic[0]+`" alt="Card image cap">
+                                            <div class="card-body">
+                                            <a href="`+rowData.detailUrl+`"><p class="card-text" title="`+rowData.title+`">`+title+`</p></a>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                        $row.append(col);
+                    }
+                    container.append($row)
+                    limit = j;
+                    skip = limit+itemSkip;
+                }
+                var extraEl = $("<div>", { "class": "row"}); 
+                for(;j<data.length;j++){
+                    var rowData = data[j];
+                    var title = rowData.title
+                    if(title.length > 15){
+                        title = title.substring(0,15)+'...';
+                    }
+                    var col = `<div class="col col-lg-6 col-md-6 col-sm-12">
+                                    <div class="card" style="width: 35.3rem;">
+                                        <img class="card-img-top img3" src="`+rowData.coverPic[0]+`" alt="Card image cap">
+                                            <div class="card-body">
+                                            <a href="`+rowData.detailUrl+`"><p class="card-text" title="`+rowData.title+`">`+title+`</p></a>
+                                            </div>
+                                    </div>
+                                </div>`;
+                    extraEl.append(col);
+                }
+
+                container.append(extraEl)
+                
+            }
+        }
+
+        task.getNewsWithLimit({paginationLimit:task.paginationLimit});
+
+        $('#show-more').on('click', function(){
+            task.paginationLimit +=2;
+            task.getNewsWithLimit({
+                paginationLimit:task.paginationLimit
+            })
+        })
+        
+    })
+</script>
